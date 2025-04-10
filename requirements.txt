@@ -1,0 +1,14 @@
+Django==5.1.4
+django-q2==1.7.6
+psycopg2-binary==2.9.9
+WeasyPrint==60.2
+redis==5.0.1
+python-dotenv==1.0.1
+djangorestframework==3.14.0
+djangorestframework-simplejwt==5.3.1
+drf-yasg==1.21.7
+django-cors-headers==4.3.1
+django-extensions==3.2.3
+django-auditlog==2.3.0
+django-filter==23.5
+requests==2.31.0 

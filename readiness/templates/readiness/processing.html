@@ -1,0 +1,48 @@
+{% extends 'readiness/base.html' %}
+
+{% block title %}Memproses Assessment{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body text-center">
+                <h2 class="card-title mb-4">Memproses Assessment</h2>
+                
+                <div class="mb-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+                
+                <p class="mb-4">Mohon tunggu sebentar. Kami sedang menyiapkan laporan assessment Anda.</p>
+                
+                <div id="download-section" style="display: none;">
+                    <a href="#" id="download-button" class="btn btn-primary btn-lg">
+                        Download Laporan
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function checkStatus() {
+        $.get("{% url 'check_status' assessment.id %}", function(data) {
+            if (data.ready) {
+                $('#download-section').show();
+                $('#download-button').attr('href', data.download_url);
+            } else {
+                setTimeout(checkStatus, 5000);  // Poll every 5 seconds
+            }
+        });
+    }
+    
+    $(document).ready(function() {
+        checkStatus();
+    });
+</script>
+{% endblock %} 

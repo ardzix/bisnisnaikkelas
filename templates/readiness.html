@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block title %}Business Readiness Assessment - Bisnis Naik Kelas{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Assessment Header -->
+    <section class="text-center py-12">
+        <h1 class="text-4xl font-bold mb-4">Business Readiness Assessment</h1>
+        <p class="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
+            Answer a few questions about your business to get personalized recommendations and insights.
+        </p>
+    </section>
+
+    <!-- Assessment Form -->
+    <section class="max-w-3xl mx-auto">
+        <form method="POST" class="space-y-8">
+            {% csrf_token %}
+            
+            <!-- Business Information -->
+            <div class="notion-like-card">
+                <h2 class="text-2xl font-semibold mb-6">Business Information</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label for="business_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Business Name
+                        </label>
+                        <input type="text" id="business_name" name="business_name" required
+                            class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label for="industry" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Industry
+                        </label>
+                        <select id="industry" name="industry" required
+                            class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent">
+                            <option value="">Select your industry</option>
+                            <option value="retail">Retail</option>
+                            <option value="technology">Technology</option>
+                            <option value="manufacturing">Manufacturing</option>
+                            <option value="services">Services</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Business Operations -->
+            <div class="notion-like-card">
+                <h2 class="text-2xl font-semibold mb-6">Business Operations</h2>
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            How would you rate your current business operations?
+                        </label>
+                        <div class="grid grid-cols-5 gap-4">
+                            {% for i in "12345" %}
+                            <label class="flex flex-col items-center">
+                                <input type="radio" name="operations_rating" value="{{ i }}" required
+                                    class="form-radio h-5 w-5 text-blue-600 dark:text-blue-400">
+                                <span class="mt-1 text-sm">{{ i }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div>
+                        <label for="operations_notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Additional Comments
+                        </label>
+                        <textarea id="operations_notes" name="operations_notes" rows="3"
+                            class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Marketing & Sales -->
+            <div class="notion-like-card">
+                <h2 class="text-2xl font-semibold mb-6">Marketing & Sales</h2>
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            How effective is your current marketing strategy?
+                        </label>
+                        <div class="grid grid-cols-5 gap-4">
+                            {% for i in "12345" %}
+                            <label class="flex flex-col items-center">
+                                <input type="radio" name="marketing_rating" value="{{ i }}" required
+                                    class="form-radio h-5 w-5 text-blue-600 dark:text-blue-400">
+                                <span class="mt-1 text-sm">{{ i }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div>
+                        <label for="marketing_notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Additional Comments
+                        </label>
+                        <textarea id="marketing_notes" name="marketing_notes" rows="3"
+                            class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Financial Health -->
+            <div class="notion-like-card">
+                <h2 class="text-2xl font-semibold mb-6">Financial Health</h2>
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            How would you rate your current financial management?
+                        </label>
+                        <div class="grid grid-cols-5 gap-4">
+                            {% for i in "12345" %}
+                            <label class="flex flex-col items-center">
+                                <input type="radio" name="financial_rating" value="{{ i }}" required
+                                    class="form-radio h-5 w-5 text-blue-600 dark:text-blue-400">
+                                <span class="mt-1 text-sm">{{ i }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div>
+                        <label for="financial_notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Additional Comments
+                        </label>
+                        <textarea id="financial_notes" name="financial_notes" rows="3"
+                            class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="text-center">
+                <button type="submit" class="notion-like-button text-lg px-8 py-3">
+                    Submit Assessment
+                </button>
+            </div>
+        </form>
+    </section>
+</div>
+{% endblock %} 

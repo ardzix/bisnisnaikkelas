@@ -232,4 +232,31 @@ Q_CLUSTER = {
         "port": int(os.getenv('REDIS_PORT', 6379)),
         "db": int(os.getenv('REDIS_DB', 0)),
     },
+}
+
+# Google Cloud and reCAPTCHA Enterprise settings
+GOOGLE_CLOUD_PROJECT = os.getenv('GOOGLE_CLOUD_PROJECT')
+RECAPTCHA_SITE_KEY = os.getenv('RECAPTCHA_SITE_KEY', 'your-site-key-here')
+GOOGLE_APPLICATION_CREDENTIALS = os.path.join(BASE_DIR, os.getenv('GOOGLE_APPLICATION_CREDENTIALS'))
+
+# Logging configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'readiness': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
 } 

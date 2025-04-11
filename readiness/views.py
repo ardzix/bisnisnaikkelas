@@ -8,6 +8,12 @@ from .models import BusinessAssessment
 from .scoring import calculate_assessment
 from .tasks import schedule_pdf_generation
 import json
+import requests
+from google.cloud import recaptchaenterprise_v1
+import logging
+import os
+
+logger = logging.getLogger(__name__)
 
 def home(request):
     """Render the home page"""
@@ -19,11 +25,71 @@ def sitemap(request):
 
 def assessment_form(request):
     """Render the assessment form"""
-    return render(request, 'readiness/form.html')
+    return render(request, 'readiness/form.html', {
+        'recaptcha_site_key': settings.RECAPTCHA_SITE_KEY
+    })
+
+def verify_recaptcha_token(token, action):
+    """Verify reCAPTCHA token with Google's Enterprise API"""
+    try:
+        # Log environment variables and settings
+        logger.info(f"GOOGLE_APPLICATION_CREDENTIALS: {os.getenv('GOOGLE_APPLICATION_CREDENTIALS')}")
+        logger.info(f"GOOGLE_CLOUD_PROJECT: {settings.GOOGLE_CLOUD_PROJECT}")
+        logger.info(f"RECAPTCHA_SITE_KEY: {settings.RECAPTCHA_SITE_KEY}")
+        
+        client = recaptchaenterprise_v1.RecaptchaEnterpriseServiceClient()
+        project_name = f"projects/{settings.GOOGLE_CLOUD_PROJECT}"
+        
+        # Create assessment
+        assessment = recaptchaenterprise_v1.Assessment()
+        assessment.event = recaptchaenterprise_v1.Event()
+        assessment.event.site_key = settings.RECAPTCHA_SITE_KEY
+        assessment.event.token = token
+        assessment.event.expected_action = action
+        
+        request = recaptchaenterprise_v1.CreateAssessmentRequest()
+        request.parent = project_name
+        request.assessment = assessment
+        
+        logger.info("Sending assessment request to Google reCAPTCHA Enterprise API")
+        response = client.create_assessment(request)
+        logger.info(f"Received response from Google reCAPTCHA Enterprise API: {response}")
+        
+        # Check if the token is valid
+        if not response.token_properties.valid:
+            logger.error("Invalid reCAPTCHA token")
+            return False, "Invalid reCAPTCHA token"
+        
+        # Check if the action matches
+        if response.token_properties.action != action:
+            logger.error(f"Action mismatch. Expected: {action}, Got: {response.token_properties.action}")
+            return False, "Action name doesn't match"
+        
+        # Check the score
+        score = response.risk_analysis.score
+        logger.info(f"reCAPTCHA score: {score}")
+        if score < 0.5:  # You can adjust this threshold
+            logger.warning(f"Score too low: {score}")
+            return False, "Score too low"
+        
+        return True, None
+        
+    except Exception as e:
+        logger.exception("Error verifying reCAPTCHA token")
+        return False, str(e)
 
 @require_http_methods(["POST"])
 def submit_assessment(request):
     """Handle form submission and create assessment"""
+    # Verify reCAPTCHA Express token
+    token = request.POST.get('recaptcha-token')
+    if not token:
+        return JsonResponse({'error': 'reCAPTCHA token is required'}, status=400)
+    
+    success, error = verify_recaptcha_token(token, 'submit')
+    if not success:
+        return JsonResponse({'error': f'reCAPTCHA verification failed: {error}'}, status=400)
+    
     try:
         # Create assessment from form data
         assessment = BusinessAssessment.objects.create(

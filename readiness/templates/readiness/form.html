@@ -2,25 +2,170 @@
 
 {% block title %}Assessment Form{% endblock %}
 
+{% block extra_css %}
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+    
+    .form-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    
+    .form-card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 0 25px rgba(0,0,0,0.08);
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .form-header {
+        background: linear-gradient(to right, #2c3e50, #4a6285);
+        color: white;
+        padding: 30px;
+        text-align: center;
+    }
+    
+    .form-title {
+        color: white;
+        font-size: 32px;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+    
+    .form-subtitle {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 16px;
+    }
+    
+    .form-body {
+        padding: 30px;
+        background: white;
+    }
+    
+    .form-section {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.03);
+        margin-bottom: 20px;
+        overflow: hidden;
+        border: 1px solid rgba(44, 62, 80, 0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .form-section:hover {
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        transform: translateY(-2px);
+    }
+    
+    .form-section-header {
+        background: linear-gradient(to right, #2c3e50, #4a6285);
+        color: white;
+        padding: 15px 20px;
+        font-size: 18px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+    }
+    
+    .form-section-header i {
+        margin-right: 10px;
+        opacity: 0.8;
+    }
+    
+    .form-section-body {
+        padding: 20px;
+    }
+    
+    .form-control, .form-select {
+        border-radius: 8px;
+        padding: 12px 15px;
+        border: 1px solid rgba(44, 62, 80, 0.2);
+        transition: all 0.3s;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #2c3e50;
+        box-shadow: 0 0 0 0.2rem rgba(44, 62, 80, 0.15);
+    }
+    
+    .form-check {
+        margin-bottom: 12px;
+        padding-left: 32px;
+    }
+    
+    .form-check-input {
+        width: 20px;
+        height: 20px;
+        margin-top: 0.2rem;
+        border: 2px solid rgba(44, 62, 80, 0.3);
+        cursor: pointer;
+    }
+    
+    .form-check-input:checked {
+        background-color: #2c3e50;
+        border-color: #2c3e50;
+    }
+    
+    .form-check-label {
+        cursor: pointer;
+        font-size: 15px;
+        padding-top: 2px;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 8px;
+    }
+    
+    .submit-btn {
+        background: linear-gradient(to right, #2c3e50, #4a6285);
+        border: none;
+        border-radius: 10px;
+        color: white;
+        font-weight: 600;
+        padding: 15px 40px;
+        font-size: 18px;
+        margin-top: 20px;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .submit-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(44, 62, 80, 0.25);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-body">
-                <h2 class="card-title text-center mb-4">Assessment Bisnis Naik Kelas</h2>
+<div class="form-container py-5">
+    <div class="form-card">
+        <div class="form-header">
+            <h2 class="form-title">Assessment Bisnis Naik Kelas</h2>
+            <p class="form-subtitle">Evaluasi kesiapan bisnis Anda untuk naik ke level berikutnya</p>
+        </div>
+        
+        <div class="form-body">
+            <form method="post" action="{% url 'submit_assessment' %}" id="assessmentForm">
+                {% csrf_token %}
                 
-                <form method="post" action="{% url 'submit_assessment' %}">
-                    {% csrf_token %}
-                    
-                    <!-- Basic Information -->
-                    <div class="mb-4">
-                        <h4>Informasi Dasar</h4>
-                        <div class="mb-3">
+                <!-- Basic Information -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <i class="fas fa-info-circle"></i> Informasi Dasar
+                    </div>
+                    <div class="form-section-body">
+                        <div class="mb-4">
                             <label for="business_name" class="form-label">Nama Bisnis</label>
                             <input type="text" class="form-control" id="business_name" name="business_name" required>
                         </div>
                         
-                        <div class="mb-3">
+                        <div class="mb-4">
                             <label for="business_type" class="form-label">Jenis Bisnis</label>
                             <select class="form-select" id="business_type" name="business_type" required>
                                 <option value="">Pilih jenis bisnis</option>
@@ -34,24 +179,28 @@
                         
                         <div class="row">
                             <div class="col-md-6">
-                                <div class="mb-3">
+                                <div class="mb-4">
                                     <label for="year_started" class="form-label">Tahun Mulai</label>
                                     <input type="number" class="form-control" id="year_started" name="year_started" min="1900" max="2024" required>
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="mb-3">
+                                <div class="mb-4">
                                     <label for="employee_count" class="form-label">Jumlah Karyawan</label>
                                     <input type="number" class="form-control" id="employee_count" name="employee_count" min="1" required>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Financial Information -->
-                    <div class="mb-4">
-                        <h4>Informasi Keuangan</h4>
-                        <div class="mb-3">
+                </div>
+                
+                <!-- Financial Information -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <i class="fas fa-money-bill-wave"></i> Informasi Keuangan
+                    </div>
+                    <div class="form-section-body">
+                        <div class="mb-4">
                             <label for="annual_revenue" class="form-label">Pendapatan Tahunan (IDR)</label>
                             <input type="number" class="form-control" id="annual_revenue" name="annual_revenue" min="0" required>
                         </div>
@@ -101,10 +250,14 @@
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Digital Presence -->
-                    <div class="mb-4">
-                        <h4>Kehadiran Digital</h4>
+                </div>
+                
+                <!-- Digital Presence -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <i class="fas fa-globe"></i> Kehadiran Digital
+                    </div>
+                    <div class="form-section-body">
                         <div class="mb-3">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="has_website" name="has_website">
@@ -159,10 +312,14 @@
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Legal Documentation -->
-                    <div class="mb-4">
-                        <h4>Dokumentasi Legal</h4>
+                </div>
+                
+                <!-- Legal Documentation -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <i class="fas fa-file-contract"></i> Dokumentasi Legal
+                    </div>
+                    <div class="form-section-body">
                         <div class="mb-3">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="has_npwp" name="has_npwp">
@@ -217,10 +374,14 @@
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Operational -->
-                    <div class="mb-4">
-                        <h4>Operasional</h4>
+                </div>
+                
+                <!-- Operational -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <i class="fas fa-cogs"></i> Operasional
+                    </div>
+                    <div class="form-section-body">
                         <div class="mb-3">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="has_sop_documentation" name="has_sop_documentation">
@@ -239,10 +400,14 @@
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Strategy -->
-                    <div class="mb-4">
-                        <h4>Strategi</h4>
+                </div>
+                
+                <!-- Strategy -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <i class="fas fa-chess"></i> Strategi
+                    </div>
+                    <div class="form-section-body">
                         <div class="mb-3">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="has_vision_and_mission" name="has_vision_and_mission">
@@ -279,10 +444,14 @@
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Risk & Compliance -->
-                    <div class="mb-4">
-                        <h4>Risiko & Kepatuhan</h4>
+                </div>
+                
+                <!-- Risk & Compliance -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <i class="fas fa-shield-alt"></i> Risiko & Kepatuhan
+                    </div>
+                    <div class="form-section-body">
                         <div class="mb-3">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="has_data_backup" name="has_data_backup">
@@ -328,10 +497,14 @@
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Technology -->
-                    <div class="mb-4">
-                        <h4>Teknologi</h4>
+                </div>
+                
+                <!-- Technology -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <i class="fas fa-laptop-code"></i> Teknologi
+                    </div>
+                    <div class="form-section-body">
                         <div class="mb-3">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="uses_inventory_software" name="uses_inventory_software">
@@ -368,10 +541,14 @@
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Market Access -->
-                    <div class="mb-4">
-                        <h4>Akses Pasar</h4>
+                </div>
+                
+                <!-- Market Access -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <i class="fas fa-store"></i> Akses Pasar
+                    </div>
+                    <div class="form-section-body">
                         <div class="mb-3">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="sells_nationally_or_internationally" name="sells_nationally_or_internationally">
@@ -408,10 +585,14 @@
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Process Maturity -->
-                    <div class="mb-4">
-                        <h4>Kematangan Proses</h4>
+                </div>
+                
+                <!-- Process Maturity -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <i class="fas fa-tasks"></i> Kematangan Proses
+                    </div>
+                    <div class="form-section-body">
                         <div class="mb-3">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="has_payroll_system" name="has_payroll_system">
@@ -448,13 +629,17 @@
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Business Goals -->
-                    <div class="mb-4">
-                        <h4>Tujuan Bisnis</h4>
-                        <div class="mb-3">
+                </div>
+                
+                <!-- Business Goals -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <i class="fas fa-bullseye"></i> Tujuan Bisnis
+                    </div>
+                    <div class="form-section-body">
+                        <div class="mb-4">
                             <label for="business_goals" class="form-label">Apa tujuan bisnis Anda untuk 1 tahun ke depan?</label>
-                            <textarea class="form-control" id="business_goals" name="business_goals" rows="3" required></textarea>
+                            <textarea class="form-control" id="business_goals" name="business_goals" rows="4" required></textarea>
                         </div>
                         
                         <div class="mb-3">
@@ -466,13 +651,81 @@
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="text-center">
-                        <button type="submit" class="btn btn-primary btn-lg">Kirim Assessment</button>
-                    </div>
-                </form>
-            </div>
+                </div>
+                
+                <div class="text-center">
+                    <div id="recaptcha-container"></div>
+                    <button type="submit" class="submit-btn" id="submitBtn">Kirim Assessment</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://www.google.com/recaptcha/enterprise.js?render={{ recaptcha_site_key }}"></script>
+<script>
+    // Add smooth animations
+    document.addEventListener('DOMContentLoaded', function() {
+        const sections = document.querySelectorAll('.form-section');
+        
+        // Add staggered fade-in effect
+        sections.forEach((section, index) => {
+            section.style.opacity = '0';
+            section.style.transform = 'translateY(20px)';
+            section.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            
+            setTimeout(() => {
+                section.style.opacity = '1';
+                section.style.transform = 'translateY(0)';
+            }, 100 * index);
+        });
+
+        // Handle form submission
+        const form = document.getElementById('assessmentForm');
+        const submitBtn = document.getElementById('submitBtn');
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Mengirim...';
+
+            grecaptcha.enterprise.ready(async () => {
+                try {
+                    const token = await grecaptcha.enterprise.execute('{{ recaptcha_site_key }}', {action: 'submit'});
+                    
+                    // Add token to form data
+                    const formData = new FormData(form);
+                    formData.append('recaptcha-token', token);
+
+                    // Submit the form
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        }
+                    });
+
+                    if (response.redirected) {
+                        window.location.href = response.url;
+                    } else {
+                        const data = await response.json();
+                        if (data.error) {
+                            alert(data.error);
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = 'Kirim Assessment';
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('An error occurred. Please try again.');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = 'Kirim Assessment';
+                }
+            });
+        });
+    });
+</script>
 {% endblock %} 

@@ -141,4 +141,10 @@ static/
 *.bak
 
 # Staticfiles directory
-staticfiles/ 
+staticfiles/
+
+# Credentials and sensitive data
+credentials/
+*.pem
+*.key
+*.crt 

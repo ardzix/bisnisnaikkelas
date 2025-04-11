@@ -148,3 +148,4 @@ credentials/
 *.pem
 *.key
 *.crt 
+public.pem

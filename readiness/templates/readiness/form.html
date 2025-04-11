@@ -2,729 +2,506 @@
 
 {% block title %}Assessment Form{% endblock %}
 
-{% block extra_css %}
-<style>
-    body {
-        background-color: #f8f9fa;
-    }
-    
-    .form-container {
-        max-width: 900px;
-        margin: 0 auto;
-    }
-    
-    .form-card {
-        border: none;
-        border-radius: 16px;
-        box-shadow: 0 0 25px rgba(0,0,0,0.08);
-        overflow: hidden;
-        transition: all 0.3s ease;
-    }
-    
-    .form-header {
-        background: linear-gradient(to right, #2c3e50, #4a6285);
-        color: white;
-        padding: 30px;
-        text-align: center;
-    }
-    
-    .form-title {
-        color: white;
-        font-size: 32px;
-        font-weight: 700;
-        margin-bottom: 8px;
-    }
-    
-    .form-subtitle {
-        color: rgba(255, 255, 255, 0.8);
-        font-size: 16px;
-    }
-    
-    .form-body {
-        padding: 30px;
-        background: white;
-    }
-    
-    .form-section {
-        background-color: white;
-        border-radius: 10px;
-        box-shadow: 0 0 15px rgba(0,0,0,0.03);
-        margin-bottom: 20px;
-        overflow: hidden;
-        border: 1px solid rgba(44, 62, 80, 0.1);
-        transition: all 0.3s ease;
-    }
-    
-    .form-section:hover {
-        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
-        transform: translateY(-2px);
-    }
-    
-    .form-section-header {
-        background: linear-gradient(to right, #2c3e50, #4a6285);
-        color: white;
-        padding: 15px 20px;
-        font-size: 18px;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-    }
-    
-    .form-section-header i {
-        margin-right: 10px;
-        opacity: 0.8;
-    }
-    
-    .form-section-body {
-        padding: 20px;
-    }
-    
-    .form-control, .form-select {
-        border-radius: 8px;
-        padding: 12px 15px;
-        border: 1px solid rgba(44, 62, 80, 0.2);
-        transition: all 0.3s;
-    }
-    
-    .form-control:focus, .form-select:focus {
-        border-color: #2c3e50;
-        box-shadow: 0 0 0 0.2rem rgba(44, 62, 80, 0.15);
-    }
-    
-    .form-check {
-        margin-bottom: 12px;
-        padding-left: 32px;
-    }
-    
-    .form-check-input {
-        width: 20px;
-        height: 20px;
-        margin-top: 0.2rem;
-        border: 2px solid rgba(44, 62, 80, 0.3);
-        cursor: pointer;
-    }
-    
-    .form-check-input:checked {
-        background-color: #2c3e50;
-        border-color: #2c3e50;
-    }
-    
-    .form-check-label {
-        cursor: pointer;
-        font-size: 15px;
-        padding-top: 2px;
-    }
-    
-    .form-label {
-        font-weight: 600;
-        color: #2c3e50;
-        margin-bottom: 8px;
-    }
-    
-    .submit-btn {
-        background: linear-gradient(to right, #2c3e50, #4a6285);
-        border: none;
-        border-radius: 10px;
-        color: white;
-        font-weight: 600;
-        padding: 15px 40px;
-        font-size: 18px;
-        margin-top: 20px;
-        transition: all 0.3s ease;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    
-    .submit-btn:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(44, 62, 80, 0.25);
-    }
-</style>
-{% endblock %}
+{% block readiness_content %}
+<!-- Add reCAPTCHA script -->
+<script src="https://www.google.com/recaptcha/enterprise.js?render={{ recaptcha_site_key }}"></script>
 
-{% block content %}
-<div class="form-container py-5">
-    <div class="form-card">
-        <div class="form-header">
-            <h2 class="form-title">Assessment Bisnis Naik Kelas</h2>
-            <p class="form-subtitle">Evaluasi kesiapan bisnis Anda untuk naik ke level berikutnya</p>
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-10 mb-8 transition-all duration-300 hover:shadow-xl hover:border-blue-400/30">
+        <div class="text-center mb-10">
+            <h1 class="text-3xl font-bold text-gray-800 dark:text-white mb-3 bg-gradient-to-r from-gray-800 to-gray-600 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent">
+                Assessment Bisnis Naik Kelas
+            </h1>
+            <p class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                Evaluasi kesiapan bisnis Anda untuk naik ke level berikutnya
+            </p>
         </div>
-        
-        <div class="form-body">
-            <form method="post" action="{% url 'submit_assessment' %}" id="assessmentForm">
-                {% csrf_token %}
+
+        <form id="assessmentForm" method="POST" action="{% url 'readiness:submit_assessment' %}" class="space-y-8">
+            {% csrf_token %}
+            
+            <!-- Basic Information Section -->
+            <div class="bg-gray-50 dark:bg-gray-700 rounded-xl p-6 border border-gray-100 dark:border-gray-600 hover:bg-gray-100/50 dark:hover:bg-gray-600/50 hover:border-gray-200 dark:hover:border-gray-500 transition-colors duration-200">
+                <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-6 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    Informasi Dasar
+                </h2>
                 
-                <!-- Basic Information -->
-                <div class="form-section">
-                    <div class="form-section-header">
-                        <i class="fas fa-info-circle"></i> Informasi Dasar
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" for="business_name">Nama Bisnis</label>
+                        <input type="text" class="w-full px-4 py-3 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200" id="business_name" name="business_name" placeholder="Nama bisnis Anda" required>
                     </div>
-                    <div class="form-section-body">
-                        <div class="mb-4">
-                            <label for="business_name" class="form-label">Nama Bisnis</label>
-                            <input type="text" class="form-control" id="business_name" name="business_name" required>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" for="business_type">Jenis Bisnis</label>
+                        <select class="w-full px-4 py-3 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200" id="business_type" name="business_type" required>
+                            <option value="">Pilih jenis bisnis</option>
+                            <option value="manufacturing">Manufacturing</option>
+                            <option value="retail">Retail</option>
+                            <option value="service">Service</option>
+                            <option value="food">Food & Beverage</option>
+                            <option value="other">Lainnya</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" for="year_started">Tahun Mulai</label>
+                        <input type="number" class="w-full px-4 py-3 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200" id="year_started" name="year_started" min="1900" max="2024" placeholder="Contoh: 2020" required>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" for="employee_count">Jumlah Karyawan</label>
+                        <input type="number" class="w-full px-4 py-3 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200" id="employee_count" name="employee_count" min="1" placeholder="Jumlah karyawan saat ini" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Financial Information Section -->
+            <div class="bg-gray-50 dark:bg-gray-700 rounded-xl p-6 border border-gray-100 dark:border-gray-600 hover:bg-gray-100/50 dark:hover:bg-gray-600/50 hover:border-gray-200 dark:hover:border-gray-500 transition-colors duration-200">
+                <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-6 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Informasi Keuangan
+                </h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" for="annual_revenue">Pendapatan Tahunan (IDR)</label>
+                        <input type="number" class="w-full px-4 py-3 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200" id="annual_revenue" name="annual_revenue" min="0" placeholder="Contoh: 100000000" required>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Praktik Keuangan</label>
+                        <div class="flex items-center space-x-4">
+                            <label class="flex items-center">
+                                <input type="checkbox" name="has_financial_records" class="form-checkbox h-4 w-4 text-blue-600">
+                                <span class="ml-2">Memiliki pencatatan keuangan</span>
+                            </label>
                         </div>
-                        
-                        <div class="mb-4">
-                            <label for="business_type" class="form-label">Jenis Bisnis</label>
-                            <select class="form-select" id="business_type" name="business_type" required>
-                                <option value="">Pilih jenis bisnis</option>
-                                <option value="manufacturing">Manufacturing</option>
-                                <option value="retail">Retail</option>
-                                <option value="service">Service</option>
-                                <option value="food">Food & Beverage</option>
-                                <option value="other">Lainnya</option>
-                            </select>
+                        <div class="flex items-center space-x-4">
+                            <label class="flex items-center">
+                                <input type="checkbox" name="has_invoice_system" class="form-checkbox h-4 w-4 text-blue-600">
+                                <span class="ml-2">Menggunakan sistem faktur</span>
+                            </label>
                         </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-4">
-                                    <label for="year_started" class="form-label">Tahun Mulai</label>
-                                    <input type="number" class="form-control" id="year_started" name="year_started" min="1900" max="2024" required>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-4">
-                                    <label for="employee_count" class="form-label">Jumlah Karyawan</label>
-                                    <input type="number" class="form-control" id="employee_count" name="employee_count" min="1" required>
-                                </div>
-                            </div>
+                        <div class="flex items-center space-x-4">
+                            <label class="flex items-center">
+                                <input type="checkbox" name="uses_financial_software" class="form-checkbox h-4 w-4 text-blue-600">
+                                <span class="ml-2">Menggunakan software keuangan</span>
+                            </label>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <label class="flex items-center">
+                                <input type="checkbox" name="has_cashflow_forecast" class="form-checkbox h-4 w-4 text-blue-600">
+                                <span class="ml-2">Memiliki perkiraan arus kas</span>
+                            </label>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <label class="flex items-center">
+                                <input type="checkbox" name="has_tax_calculation_practice" class="form-checkbox h-4 w-4 text-blue-600">
+                                <span class="ml-2">Memiliki praktik perhitungan pajak</span>
+                            </label>
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- Digital Presence Section -->
+            <div class="bg-gray-50 dark:bg-gray-700 rounded-xl p-6 border border-gray-100 dark:border-gray-600 hover:bg-gray-100/50 dark:hover:bg-gray-600/50 hover:border-gray-200 dark:hover:border-gray-500 transition-colors duration-200">
+                <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-6 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
+                    </svg>
+                    Kehadiran Digital
+                </h2>
                 
-                <!-- Financial Information -->
-                <div class="form-section">
-                    <div class="form-section-header">
-                        <i class="fas fa-money-bill-wave"></i> Informasi Keuangan
+                <div class="space-y-2">
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="has_website" class="form-checkbox h-4 w-4 text-blue-600">
+                            <span class="ml-2">Memiliki website</span>
+                        </label>
                     </div>
-                    <div class="form-section-body">
-                        <div class="mb-4">
-                            <label for="annual_revenue" class="form-label">Pendapatan Tahunan (IDR)</label>
-                            <input type="number" class="form-control" id="annual_revenue" name="annual_revenue" min="0" required>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="has_financial_records" name="has_financial_records">
-                                <label class="form-check-label" for="has_financial_records">
-                                    Memiliki pencatatan keuangan
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="has_invoice_system" name="has_invoice_system">
-                                <label class="form-check-label" for="has_invoice_system">
-                                    Menggunakan sistem faktur
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="uses_financial_software" name="uses_financial_software">
-                                <label class="form-check-label" for="uses_financial_software">
-                                    Menggunakan software keuangan
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="has_cashflow_forecast" name="has_cashflow_forecast">
-                                <label class="form-check-label" for="has_cashflow_forecast">
-                                    Memiliki perkiraan arus kas
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="has_tax_calculation_practice" name="has_tax_calculation_practice">
-                                <label class="form-check-label" for="has_tax_calculation_practice">
-                                    Memiliki praktik perhitungan pajak
-                                </label>
-                            </div>
-                        </div>
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="has_online_store" class="form-checkbox h-4 w-4 text-blue-600">
+                            <span class="ml-2">Memiliki toko online</span>
+                        </label>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="has_social_media" class="form-checkbox h-4 w-4 text-blue-600">
+                            <span class="ml-2">Memiliki media sosial</span>
+                        </label>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="is_social_media_active" class="form-checkbox h-4 w-4 text-blue-600">
+                            <span class="ml-2">Media sosial aktif</span>
+                        </label>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="uses_digital_ads" class="form-checkbox h-4 w-4 text-blue-600">
+                            <span class="ml-2">Menggunakan iklan digital</span>
+                        </label>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="uses_crm_or_marketing_tools" class="form-checkbox h-4 w-4 text-blue-600">
+                            <span class="ml-2">Menggunakan CRM atau alat pemasaran</span>
+                        </label>
                     </div>
                 </div>
+            </div>
+
+            <!-- Legal Documentation Section -->
+            <div class="bg-gray-50 dark:bg-gray-700 rounded-xl p-6 border border-gray-100 dark:border-gray-600 hover:bg-gray-100/50 dark:hover:bg-gray-600/50 hover:border-gray-200 dark:hover:border-gray-500 transition-colors duration-200">
+                <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-6 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                    </svg>
+                    Dokumentasi Legal
+                </h2>
                 
-                <!-- Digital Presence -->
-                <div class="form-section">
-                    <div class="form-section-header">
-                        <i class="fas fa-globe"></i> Kehadiran Digital
+                <div class="space-y-2">
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="has_npwp" class="form-checkbox h-4 w-4 text-blue-600">
+                            <span class="ml-2">Memiliki NPWP</span>
+                        </label>
                     </div>
-                    <div class="form-section-body">
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="has_website" name="has_website">
-                                <label class="form-check-label" for="has_website">
-                                    Memiliki website
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="has_online_store" name="has_online_store">
-                                <label class="form-check-label" for="has_online_store">
-                                    Memiliki toko online
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="has_social_media" name="has_social_media">
-                                <label class="form-check-label" for="has_social_media">
-                                    Memiliki media sosial
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="is_social_media_active" name="is_social_media_active">
-                                <label class="form-check-label" for="is_social_media_active">
-                                    Aktif di media sosial
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="uses_digital_ads" name="uses_digital_ads">
-                                <label class="form-check-label" for="uses_digital_ads">
-                                    Menggunakan iklan digital
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="uses_crm_or_marketing_tools" name="uses_crm_or_marketing_tools">
-                                <label class="form-check-label" for="uses_crm_or_marketing_tools">
-                                    Menggunakan CRM atau alat pemasaran
-                                </label>
-                            </div>
-                        </div>
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="has_business_license" class="form-checkbox h-4 w-4 text-blue-600">
+                            <span class="ml-2">Memiliki izin usaha</span>
+                        </label>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="has_profit_loss_statement" class="form-checkbox h-4 w-4 text-blue-600">
+                            <span class="ml-2">Memiliki laporan laba rugi</span>
+                        </label>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="has_balance_sheet" class="form-checkbox h-4 w-4 text-blue-600">
+                            <span class="ml-2">Memiliki neraca keuangan</span>
+                        </label>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="has_contract_templates" class="form-checkbox h-4 w-4 text-blue-600">
+                            <span class="ml-2">Memiliki template kontrak</span>
+                        </label>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="registered_with_government_platforms" class="form-checkbox h-4 w-4 text-blue-600">
+                            <span class="ml-2">Terdaftar di platform pemerintah</span>
+                        </label>
                     </div>
                 </div>
+            </div>
+
+            <!-- Operational Section -->
+            <div class="bg-gray-50 dark:bg-gray-700 rounded-xl p-6 border border-gray-100 dark:border-gray-600 hover:bg-gray-100/50 dark:hover:bg-gray-600/50 hover:border-gray-200 dark:hover:border-gray-500 transition-colors duration-200">
+                <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-6 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                    </svg>
+                    Operasional
+                </h2>
                 
-                <!-- Legal Documentation -->
-                <div class="form-section">
-                    <div class="form-section-header">
-                        <i class="fas fa-file-contract"></i> Dokumentasi Legal
+                <div class="space-y-2">
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="has_sop_documentation" class="form-checkbox h-4 w-4 text-blue-600">
+                            <span class="ml-2">Memiliki dokumentasi SOP</span>
+                        </label>
                     </div>
-                    <div class="form-section-body">
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="has_npwp" name="has_npwp">
-                                <label class="form-check-label" for="has_npwp">
-                                    Memiliki NPWP
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="has_business_license" name="has_business_license">
-                                <label class="form-check-label" for="has_business_license">
-                                    Memiliki izin usaha
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="has_profit_loss_statement" name="has_profit_loss_statement">
-                                <label class="form-check-label" for="has_profit_loss_statement">
-                                    Memiliki laporan laba rugi
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="has_balance_sheet" name="has_balance_sheet">
-                                <label class="form-check-label" for="has_balance_sheet">
-                                    Memiliki neraca keuangan
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="has_contract_templates" name="has_contract_templates">
-                                <label class="form-check-label" for="has_contract_templates">
-                                    Memiliki template kontrak
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="registered_with_government_platforms" name="registered_with_government_platforms">
-                                <label class="form-check-label" for="registered_with_government_platforms">
-                                    Terdaftar di platform pemerintah
-                                </label>
-                            </div>
-                        </div>
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="has_team_structure" class="form-checkbox h-4 w-4 text-blue-600">
+                            <span class="ml-2">Memiliki struktur tim</span>
+                        </label>
                     </div>
                 </div>
+            </div>
+
+            <!-- Strategy Section -->
+            <div class="bg-gray-50 dark:bg-gray-700 rounded-xl p-6 border border-gray-100 dark:border-gray-600 hover:bg-gray-100/50 dark:hover:bg-gray-600/50 hover:border-gray-200 dark:hover:border-gray-500 transition-colors duration-200">
+                <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-6 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                    Strategi
+                </h2>
                 
-                <!-- Operational -->
-                <div class="form-section">
-                    <div class="form-section-header">
-                        <i class="fas fa-cogs"></i> Operasional
+                <div class="space-y-2">
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="has_vision_and_mission" class="form-checkbox h-4 w-4 text-blue-600">
+                            <span class="ml-2">Memiliki visi dan misi</span>
+                        </label>
                     </div>
-                    <div class="form-section-body">
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="has_sop_documentation" name="has_sop_documentation">
-                                <label class="form-check-label" for="has_sop_documentation">
-                                    Memiliki dokumentasi SOP
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="has_team_structure" name="has_team_structure">
-                                <label class="form-check-label" for="has_team_structure">
-                                    Memiliki struktur tim
-                                </label>
-                            </div>
-                        </div>
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="has_business_plan" class="form-checkbox h-4 w-4 text-blue-600">
+                            <span class="ml-2">Memiliki rencana bisnis</span>
+                        </label>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="has_defined_target_market" class="form-checkbox h-4 w-4 text-blue-600">
+                            <span class="ml-2">Memiliki target pasar yang jelas</span>
+                        </label>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="has_unique_value_proposition" class="form-checkbox h-4 w-4 text-blue-600">
+                            <span class="ml-2">Memiliki proposisi nilai unik</span>
+                        </label>
                     </div>
                 </div>
+            </div>
+
+            <!-- Risk & Compliance Section -->
+            <div class="bg-gray-50 dark:bg-gray-700 rounded-xl p-6 border border-gray-100 dark:border-gray-600 hover:bg-gray-100/50 dark:hover:bg-gray-600/50 hover:border-gray-200 dark:hover:border-gray-500 transition-colors duration-200">
+                <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-6 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                    Risiko & Kepatuhan
+                </h2>
                 
-                <!-- Strategy -->
-                <div class="form-section">
-                    <div class="form-section-header">
-                        <i class="fas fa-chess"></i> Strategi
+                <div class="space-y-2">
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="has_data_backup" class="form-checkbox h-4 w-4 text-blue-600">
+                            <span class="ml-2">Memiliki backup data</span>
+                        </label>
                     </div>
-                    <div class="form-section-body">
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="has_vision_and_mission" name="has_vision_and_mission">
-                                <label class="form-check-label" for="has_vision_and_mission">
-                                    Memiliki visi dan misi
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="has_business_plan" name="has_business_plan">
-                                <label class="form-check-label" for="has_business_plan">
-                                    Memiliki rencana bisnis
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="has_defined_target_market" name="has_defined_target_market">
-                                <label class="form-check-label" for="has_defined_target_market">
-                                    Memiliki target pasar yang jelas
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="has_unique_value_proposition" name="has_unique_value_proposition">
-                                <label class="form-check-label" for="has_unique_value_proposition">
-                                    Memiliki proposisi nilai unik
-                                </label>
-                            </div>
-                        </div>
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="has_been_audited" class="form-checkbox h-4 w-4 text-blue-600">
+                            <span class="ml-2">Pernah diaudit</span>
+                        </label>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="has_third_party_contracts" class="form-checkbox h-4 w-4 text-blue-600">
+                            <span class="ml-2">Memiliki kontrak pihak ketiga</span>
+                        </label>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="has_tax_risk_management" class="form-checkbox h-4 w-4 text-blue-600">
+                            <span class="ml-2">Memiliki manajemen risiko pajak</span>
+                        </label>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="has_internal_controls" class="form-checkbox h-4 w-4 text-blue-600">
+                            <span class="ml-2">Memiliki kontrol internal</span>
+                        </label>
                     </div>
                 </div>
+            </div>
+
+            <!-- Technology Section -->
+            <div class="bg-gray-50 dark:bg-gray-700 rounded-xl p-6 border border-gray-100 dark:border-gray-600 hover:bg-gray-100/50 dark:hover:bg-gray-600/50 hover:border-gray-200 dark:hover:border-gray-500 transition-colors duration-200">
+                <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-6 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                    Teknologi
+                </h2>
                 
-                <!-- Risk & Compliance -->
-                <div class="form-section">
-                    <div class="form-section-header">
-                        <i class="fas fa-shield-alt"></i> Risiko & Kepatuhan
+                <div class="space-y-2">
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="uses_inventory_software" class="form-checkbox h-4 w-4 text-blue-600">
+                            <span class="ml-2">Menggunakan software inventori</span>
+                        </label>
                     </div>
-                    <div class="form-section-body">
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="has_data_backup" name="has_data_backup">
-                                <label class="form-check-label" for="has_data_backup">
-                                    Memiliki backup data
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="has_been_audited" name="has_been_audited">
-                                <label class="form-check-label" for="has_been_audited">
-                                    Pernah diaudit
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="has_third_party_contracts" name="has_third_party_contracts">
-                                <label class="form-check-label" for="has_third_party_contracts">
-                                    Memiliki kontrak dengan pihak ketiga
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="has_tax_risk_management" name="has_tax_risk_management">
-                                <label class="form-check-label" for="has_tax_risk_management">
-                                    Memiliki manajemen risiko pajak
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="has_internal_controls" name="has_internal_controls">
-                                <label class="form-check-label" for="has_internal_controls">
-                                    Memiliki kontrol internal
-                                </label>
-                            </div>
-                        </div>
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="can_operate_remotely" class="form-checkbox h-4 w-4 text-blue-600">
+                            <span class="ml-2">Dapat beroperasi secara remote</span>
+                        </label>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="uses_automation_or_integration" class="form-checkbox h-4 w-4 text-blue-600">
+                            <span class="ml-2">Menggunakan otomatisasi atau integrasi</span>
+                        </label>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="has_internal_dashboard_or_kpi_system" class="form-checkbox h-4 w-4 text-blue-600">
+                            <span class="ml-2">Memiliki dashboard internal atau sistem KPI</span>
+                        </label>
                     </div>
                 </div>
+            </div>
+
+            <!-- Market Access Section -->
+            <div class="bg-gray-50 dark:bg-gray-700 rounded-xl p-6 border border-gray-100 dark:border-gray-600 hover:bg-gray-100/50 dark:hover:bg-gray-600/50 hover:border-gray-200 dark:hover:border-gray-500 transition-colors duration-200">
+                <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-6 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Akses Pasar
+                </h2>
                 
-                <!-- Technology -->
-                <div class="form-section">
-                    <div class="form-section-header">
-                        <i class="fas fa-laptop-code"></i> Teknologi
+                <div class="space-y-2">
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="sells_nationally_or_internationally" class="form-checkbox h-4 w-4 text-blue-600">
+                            <span class="ml-2">Menjual secara nasional atau internasional</span>
+                        </label>
                     </div>
-                    <div class="form-section-body">
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="uses_inventory_software" name="uses_inventory_software">
-                                <label class="form-check-label" for="uses_inventory_software">
-                                    Menggunakan software inventaris
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="can_operate_remotely" name="can_operate_remotely">
-                                <label class="form-check-label" for="can_operate_remotely">
-                                    Dapat beroperasi secara remote
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="uses_automation_or_integration" name="uses_automation_or_integration">
-                                <label class="form-check-label" for="uses_automation_or_integration">
-                                    Menggunakan otomatisasi atau integrasi
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="has_internal_dashboard_or_kpi_system" name="has_internal_dashboard_or_kpi_system">
-                                <label class="form-check-label" for="has_internal_dashboard_or_kpi_system">
-                                    Memiliki dashboard internal atau sistem KPI
-                                </label>
-                            </div>
-                        </div>
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="attends_trade_expos" class="form-checkbox h-4 w-4 text-blue-600">
+                            <span class="ml-2">Mengikuti pameran dagang</span>
+                        </label>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="has_reseller_or_distributor" class="form-checkbox h-4 w-4 text-blue-600">
+                            <span class="ml-2">Memiliki reseller atau distributor</span>
+                        </label>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="has_partnership_program" class="form-checkbox h-4 w-4 text-blue-600">
+                            <span class="ml-2">Memiliki program kemitraan</span>
+                        </label>
                     </div>
                 </div>
+            </div>
+
+            <!-- Process Maturity Section -->
+            <div class="bg-gray-50 dark:bg-gray-700 rounded-xl p-6 border border-gray-100 dark:border-gray-600 hover:bg-gray-100/50 dark:hover:bg-gray-600/50 hover:border-gray-200 dark:hover:border-gray-500 transition-colors duration-200">
+                <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-6 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                    </svg>
+                    Kematangan Proses
+                </h2>
                 
-                <!-- Market Access -->
-                <div class="form-section">
-                    <div class="form-section-header">
-                        <i class="fas fa-store"></i> Akses Pasar
+                <div class="space-y-2">
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="has_payroll_system" class="form-checkbox h-4 w-4 text-blue-600">
+                            <span class="ml-2">Memiliki sistem penggajian</span>
+                        </label>
                     </div>
-                    <div class="form-section-body">
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="sells_nationally_or_internationally" name="sells_nationally_or_internationally">
-                                <label class="form-check-label" for="sells_nationally_or_internationally">
-                                    Menjual secara nasional atau internasional
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="attends_trade_expos" name="attends_trade_expos">
-                                <label class="form-check-label" for="attends_trade_expos">
-                                    Menghadiri pameran dagang
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="has_reseller_or_distributor" name="has_reseller_or_distributor">
-                                <label class="form-check-label" for="has_reseller_or_distributor">
-                                    Memiliki reseller atau distributor
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="has_partnership_program" name="has_partnership_program">
-                                <label class="form-check-label" for="has_partnership_program">
-                                    Memiliki program kemitraan
-                                </label>
-                            </div>
-                        </div>
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="has_quality_control_process" class="form-checkbox h-4 w-4 text-blue-600">
+                            <span class="ml-2">Memiliki proses kontrol kualitas</span>
+                        </label>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="has_employee_handbook_or_sop" class="form-checkbox h-4 w-4 text-blue-600">
+                            <span class="ml-2">Memiliki buku pegangan karyawan atau SOP</span>
+                        </label>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="has_formal_onboarding" class="form-checkbox h-4 w-4 text-blue-600">
+                            <span class="ml-2">Memiliki proses onboarding formal</span>
+                        </label>
                     </div>
                 </div>
+            </div>
+
+            <!-- Business Goals Section -->
+            <div class="bg-gray-50 dark:bg-gray-700 rounded-xl p-6 border border-gray-100 dark:border-gray-600 hover:bg-gray-100/50 dark:hover:bg-gray-600/50 hover:border-gray-200 dark:hover:border-gray-500 transition-colors duration-200">
+                <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-6 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                    Tujuan Bisnis
+                </h2>
                 
-                <!-- Process Maturity -->
-                <div class="form-section">
-                    <div class="form-section-header">
-                        <i class="fas fa-tasks"></i> Kematangan Proses
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" for="business_goals">Tujuan Bisnis Anda</label>
+                        <textarea class="w-full px-4 py-3 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200" id="business_goals" name="business_goals" rows="4" placeholder="Jelaskan tujuan bisnis Anda dalam 1-2 tahun ke depan" required></textarea>
                     </div>
-                    <div class="form-section-body">
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="has_payroll_system" name="has_payroll_system">
-                                <label class="form-check-label" for="has_payroll_system">
-                                    Memiliki sistem penggajian
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="has_quality_control_process" name="has_quality_control_process">
-                                <label class="form-check-label" for="has_quality_control_process">
-                                    Memiliki proses kontrol kualitas
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="has_employee_handbook_or_sop" name="has_employee_handbook_or_sop">
-                                <label class="form-check-label" for="has_employee_handbook_or_sop">
-                                    Memiliki buku pegangan karyawan atau SOP
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="has_formal_onboarding" name="has_formal_onboarding">
-                                <label class="form-check-label" for="has_formal_onboarding">
-                                    Memiliki proses onboarding formal
-                                </label>
-                            </div>
-                        </div>
+
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="interested_in_mentoring" class="form-checkbox h-4 w-4 text-blue-600">
+                            <span class="ml-2">Tertarik dengan program mentoring</span>
+                        </label>
                     </div>
                 </div>
-                
-                <!-- Business Goals -->
-                <div class="form-section">
-                    <div class="form-section-header">
-                        <i class="fas fa-bullseye"></i> Tujuan Bisnis
-                    </div>
-                    <div class="form-section-body">
-                        <div class="mb-4">
-                            <label for="business_goals" class="form-label">Apa tujuan bisnis Anda untuk 1 tahun ke depan?</label>
-                            <textarea class="form-control" id="business_goals" name="business_goals" rows="4" required></textarea>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="interested_in_mentoring" name="interested_in_mentoring">
-                                <label class="form-check-label" for="interested_in_mentoring">
-                                    Tertarik dengan program mentoring
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="text-center">
-                    <div id="recaptcha-container"></div>
-                    <button type="submit" class="submit-btn" id="submitBtn">Kirim Assessment</button>
-                </div>
-            </form>
-        </div>
+            </div>
+
+            <div class="text-center">
+                <button type="submit" class="bg-blue-500 dark:bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors duration-200">
+                    Kirim Assessment
+                </button>
+            </div>
+        </form>
     </div>
 </div>
-{% endblock %}
 
-{% block extra_js %}
-<script src="https://www.google.com/recaptcha/enterprise.js?render={{ recaptcha_site_key }}"></script>
 <script>
-    // Add smooth animations
-    document.addEventListener('DOMContentLoaded', function() {
-        const sections = document.querySelectorAll('.form-section');
-        
-        // Add staggered fade-in effect
-        sections.forEach((section, index) => {
-            section.style.opacity = '0';
-            section.style.transform = 'translateY(20px)';
-            section.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+    $(document).ready(function() {
+        // Add animation to form sections
+        $('.bg-gray-50').each(function(index) {
+            $(this).css('opacity', '0');
+            $(this).css('transform', 'translateY(20px)');
             
             setTimeout(() => {
-                section.style.opacity = '1';
-                section.style.transform = 'translateY(0)';
-            }, 100 * index);
+                $(this).css('transition', 'all 0.5s ease');
+                $(this).css('opacity', '1');
+                $(this).css('transform', 'translateY(0)');
+            }, 100 * (index + 1));
         });
-
-        // Handle form submission
-        const form = document.getElementById('assessmentForm');
-        const submitBtn = document.getElementById('submitBtn');
-
-        form.addEventListener('submit', function(e) {
+        
+        // Form submission handling
+        $('#assessmentForm').on('submit', function(e) {
             e.preventDefault();
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Mengirim...';
-
-            grecaptcha.enterprise.ready(async () => {
-                try {
-                    const token = await grecaptcha.enterprise.execute('{{ recaptcha_site_key }}', {action: 'submit'});
-                    
+            
+            const submitButton = $('.bg-blue-500');
+            submitButton.prop('disabled', true);
+            submitButton.html('<span class="flex items-center"><svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Mengirim...</span>');
+            
+            // Get reCAPTCHA token
+            grecaptcha.enterprise.ready(function() {
+                grecaptcha.enterprise.execute('{{ recaptcha_site_key }}', {action: 'submit'}).then(function(token) {
                     // Add token to form data
-                    const formData = new FormData(form);
-                    formData.append('recaptcha-token', token);
-
-                    // Submit the form
-                    const response = await fetch(form.action, {
+                    const formData = $(this).serializeArray();
+                    formData.push({name: 'recaptcha-token', value: token});
+                    
+                    $.ajax({
+                        url: $(this).attr('action'),
                         method: 'POST',
-                        body: formData,
-                        headers: {
-                            'X-CSRFToken': '{{ csrf_token }}'
+                        data: formData,
+                        success: function(response) {
+                            window.location.href = response.redirect_url;
+                        },
+                        error: function(xhr) {
+                            console.log(xhr);
+                            alert('Terjadi kesalahan. Silakan coba lagi.');
+                            submitButton.prop('disabled', false);
+                            submitButton.html('Kirim Assessment');
                         }
                     });
-
-                    if (response.redirected) {
-                        window.location.href = response.url;
-                    } else {
-                        const data = await response.json();
-                        if (data.error) {
-                            alert(data.error);
-                            submitBtn.disabled = false;
-                            submitBtn.innerHTML = 'Kirim Assessment';
-                        }
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    alert('An error occurred. Please try again.');
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = 'Kirim Assessment';
-                }
-            });
+                }.bind(this));
+            }.bind(this));
         });
     });
 </script>

@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.humanize',
     'django_extensions',
     'rest_framework',
     'drf_yasg',
@@ -259,4 +260,8 @@ LOGGING = {
             'propagate': True,
         },
     },
-} 
+}
+
+# Login URL for @login_required decorator
+LOGIN_URL = '/accounts/login/'
+LOGIN_REDIRECT_URL = '/readiness/dashboard/' 

@@ -1,10 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_http_methods
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.conf import settings
-from .models import BusinessAssessment
+from .models import BusinessAssessment, UserProfile
 from .scoring import calculate_assessment
 from .tasks import schedule_pdf_generation
 import json
@@ -12,8 +12,16 @@ import requests
 from google.cloud import recaptchaenterprise_v1
 import logging
 import os
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth import get_user_model
+from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework.exceptions import AuthenticationFailed
+from django.urls import reverse
+from django.contrib.auth.decorators import login_required
 
 logger = logging.getLogger(__name__)
+User = get_user_model()
 
 def home(request):
     """Render the home page"""
@@ -177,18 +185,38 @@ def submit_assessment(request):
         assessment.total_score = scores['total']
         assessment.save()
         
+        # If user is authenticated and has a profile, associate assessment
+        if request.user.is_authenticated:
+            try:
+                profile = request.user.profile
+                profile.assessments.add(assessment)
+            except UserProfile.DoesNotExist:
+                # Create profile if it doesn't exist
+                profile = UserProfile.objects.create(
+                    user=request.user,
+                    full_name=request.user.email.split('@')[0],  # Default name from email
+                    phone_number=''
+                )
+                profile.assessments.add(assessment)  # Add assessment after creation
+        
         # Schedule PDF generation
         schedule_pdf_generation(str(assessment.id))
         
-        # Redirect to processing page
-        return redirect('processing', assessment_id=assessment.id)
+        # Return JSON response with processing URL
+        return JsonResponse({
+            'success': True,
+            'redirect_url': reverse('readiness:processing', args=[str(assessment.id)])
+        })
         
     except Exception as e:
+        logger.exception("Assessment submission error")
         return JsonResponse({'error': str(e)}, status=400)
 
 def processing(request, assessment_id):
     """Show processing page while PDF is being generated"""
     assessment = get_object_or_404(BusinessAssessment, id=assessment_id)
+    # Store assessment ID in session for later association
+    request.session['pending_assessment_id'] = str(assessment_id)
     return render(request, 'readiness/processing.html', {'assessment': assessment})
 
 @require_http_methods(["GET"])
@@ -206,5 +234,287 @@ def download_report(request, assessment_id):
     if not assessment.report_ready or not assessment.report_pdf:
         return JsonResponse({'error': 'Report not ready'}, status=404)
     
-    response = default_storage.open(assessment.report_pdf.name)
-    return response 
+    try:
+        file = default_storage.open(assessment.report_pdf.name)
+        response = HttpResponse(file.read(), content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="assessment_report_{assessment_id}.pdf"'
+        return response
+    except Exception as e:
+        logger.exception("Error serving report file")
+        return JsonResponse({'error': str(e)}, status=500)
+
+def verify_token(token):
+    """Verify JWT token using rest_framework_simplejwt"""
+    try:
+        # Use AccessToken to validate and decode
+        validated_token = AccessToken(token)
+        
+        # Get user_id from token
+        user_id = validated_token.get('user_id')
+        if not user_id:
+            return False, "Invalid token: 'user_id' not found"
+            
+        return True, validated_token.payload
+    except TokenError as e:
+        return False, str(e)
+    except Exception as e:
+        logger.exception("Token verification error")
+        return False, str(e)
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def register(request):
+    """Handle user registration through SSO service"""
+    try:
+        data = {
+            'email': request.POST['email'],
+            'password': request.POST['password']
+        }
+        
+        # Try to register with SSO service
+        response = requests.post(
+            f"{settings.SSO_BASE_URL}register/",
+            json=data,
+            timeout=5
+        )
+        
+        if response.status_code == 400:
+            # Check if error is due to existing email
+            error_data = response.json()
+            if 'email' in error_data and 'already exists' in str(error_data['email']).lower():
+                # Email exists in SSO, try to login instead
+                login_response = requests.post(
+                    f"{settings.SSO_BASE_URL}login/",
+                    json=data,
+                    timeout=5
+                )
+                
+                if login_response.status_code != 200:
+                    return JsonResponse({'error': 'Invalid credentials'}, status=400)
+                    
+                tokens = login_response.json()
+                
+                # If MFA is required, return that to the client
+                if tokens.get('mfa_required'):
+                    return JsonResponse(tokens)
+                
+                # Verify the access token
+                is_valid, token_data = verify_token(tokens['access'])
+                if not is_valid:
+                    return JsonResponse({'error': f'Token verification failed: {token_data}'}, status=400)
+                
+                # Create local user profile if it doesn't exist
+                try:
+                    user = User.objects.get(username=token_data['user_id'])
+                except User.DoesNotExist:
+                    # Create user locally
+                    user = User.objects.create(
+                        username=token_data['user_id'],
+                        email=request.POST['email']
+                    )
+                
+                # Create or update profile
+                UserProfile.objects.update_or_create(
+                    user=user,
+                    defaults={
+                        'full_name': request.POST['full_name'],
+                        'phone_number': request.POST['phone']
+                    }
+                )
+                
+                # Associate pending assessment if exists
+                pending_assessment_id = request.session.get('pending_assessment_id')
+                if pending_assessment_id:
+                    try:
+                        assessment = BusinessAssessment.objects.get(id=pending_assessment_id)
+                        user.profile.assessments.add(assessment)
+                        del request.session['pending_assessment_id']
+                    except BusinessAssessment.DoesNotExist:
+                        pass
+                
+                return JsonResponse(tokens)
+            else:
+                # Other registration error
+                return JsonResponse({'error': error_data}, status=400)
+        
+        elif response.status_code != 201:
+            return JsonResponse({'error': 'Registration failed'}, status=400)
+            
+        # Get tokens from successful registration
+        tokens = response.json()
+        
+        # Verify the access token
+        is_valid, token_data = verify_token(tokens['access'])
+        if not is_valid:
+            return JsonResponse({'error': f'Token verification failed: {token_data}'}, status=400)
+        
+        # Create user profile
+        try:
+            user = User.objects.get(username=token_data['user_id'])
+        except User.DoesNotExist:
+            user = User.objects.create(
+                username=token_data['user_id'],
+                email=request.POST['email']
+            )
+            
+        UserProfile.objects.create(
+            user=user,
+            full_name=request.POST['full_name'],
+            phone_number=request.POST['phone']
+        )
+        
+        # Associate pending assessment if exists
+        pending_assessment_id = request.session.get('pending_assessment_id')
+        if pending_assessment_id:
+            try:
+                assessment = BusinessAssessment.objects.get(id=pending_assessment_id)
+                user.profile.assessments.add(assessment)
+                del request.session['pending_assessment_id']
+            except BusinessAssessment.DoesNotExist:
+                pass
+        
+        return JsonResponse(tokens)
+        
+    except Exception as e:
+        logger.exception("Registration error")
+        return JsonResponse({'error': str(e)}, status=400)
+
+@csrf_exempt
+def login(request):
+    """Handle user login through SSO service"""
+    if request.method == 'GET':
+        # Show login form
+        next_url = request.GET.get('next', '')
+        return render(request, 'readiness/login.html', {'next': next_url})
+        
+    # Handle POST request for login
+    try:
+        # Parse JSON data from request body
+        data = json.loads(request.body)
+        email = data.get('email')
+        password = data.get('password')
+        
+        if not email or not password:
+            return JsonResponse({'error': 'Email and password are required'}, status=400)
+        
+        # Login with SSO service
+        response = requests.post(
+            f"{settings.SSO_BASE_URL}login/",
+            json={
+                'email': email,
+                'password': password
+            },
+            timeout=5
+        )
+        
+        if response.status_code != 200:
+            return JsonResponse({'error': 'Invalid credentials'}, status=400)
+            
+        # Get tokens from response
+        tokens = response.json()
+        
+        # Check if MFA is required
+        if tokens.get('mfa_required'):
+            return JsonResponse({'mfa_required': True, 'message': tokens['message']})
+            
+        # Verify the access token
+        is_valid, token_data = verify_token(tokens['access'])
+        if not is_valid:
+            return JsonResponse({'error': f'Token verification failed: {token_data}'}, status=400)
+        
+        # Store refresh token in session
+        request.session['refresh_token'] = tokens['refresh']
+        
+        # Create local user if doesn't exist
+        try:
+            user = User.objects.get(username=token_data['user_id'])
+        except User.DoesNotExist:
+            user = User.objects.create(
+                username=token_data['user_id'],
+                email=email
+            )
+        
+        # Get or create profile
+        try:
+            profile = user.profile
+        except UserProfile.DoesNotExist:
+            profile = UserProfile.objects.create(
+                user=user,
+                full_name=token_data.get('full_name', email.split('@')[0]),
+                phone_number=''
+            )
+        
+        # Associate pending assessment if exists
+        pending_assessment_id = request.session.get('pending_assessment_id')
+        if pending_assessment_id:
+            try:
+                assessment = BusinessAssessment.objects.get(id=pending_assessment_id)
+                profile.assessments.add(assessment)
+                del request.session['pending_assessment_id']
+            except BusinessAssessment.DoesNotExist:
+                pass
+            
+        # Get the next URL from the request or default to dashboard
+        next_url = data.get('next') or reverse('readiness:user_dashboard')
+        
+        # Log the user in
+        from django.contrib.auth import login as auth_login
+        auth_login(request, user)
+        
+        return JsonResponse({
+            'success': True,
+            'redirect_url': next_url,
+            **tokens
+        })
+        
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+    except Exception as e:
+        logger.exception("Login error")
+        return JsonResponse({'error': str(e)}, status=400)
+
+@require_http_methods(["GET"])
+@login_required
+def user_dashboard(request):
+    """Render user dashboard"""
+    assessments = request.user.profile.assessments.all().order_by('-created_at')
+    latest_assessment = assessments.first() if assessments.exists() else None
+    return render(request, 'readiness/user_dashboard.html', {
+        'assessments': assessments,
+        'latest_assessment': latest_assessment
+    })
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def logout(request):
+    """Handle user logout through SSO service"""
+    try:
+        refresh_token = request.session.get('refresh_token')
+        
+        # Even if SSO logout fails, we should still logout locally
+        try:
+            if refresh_token:
+                # Logout with SSO service
+                response = requests.post(
+                    f"{settings.SSO_BASE_URL}logout/",
+                    json={'refresh': refresh_token},
+                    timeout=5
+                )
+                # Log but don't fail if SSO logout fails
+                if response.status_code != 205:
+                    logger.warning(f"SSO logout failed with status {response.status_code}")
+        except Exception as e:
+            logger.warning(f"SSO logout failed: {str(e)}")
+        
+        # Clear Django session and logout
+        from django.contrib.auth import logout as auth_logout
+        auth_logout(request)
+        
+        # Clear session data
+        request.session.flush()
+            
+        return JsonResponse({'success': True, 'message': 'Logged out successfully'})
+        
+    except Exception as e:
+        logger.exception("Logout error")
+        return JsonResponse({'error': str(e)}, status=400) 

@@ -1,0 +1,57 @@
+<!-- FAQ Section with accordion style -->
+<section id="faq" class="py-24 bg-gray-50 dark:bg-gray-800 relative overflow-hidden">
+    <!-- Decorative elements -->
+    <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-full opacity-30 blur-3xl"></div>
+    <div class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-gradient-to-br from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-full opacity-30 blur-3xl"></div>
+    
+    <div class="container mx-auto px-4 relative">
+        <div class="text-center max-w-2xl mx-auto mb-20">
+            <div class="inline-block bg-blue-50 dark:bg-blue-900/30 px-4 py-1 rounded-full mb-4">
+                <span class="text-blue-600 dark:text-blue-400 font-medium text-sm">FAQ</span>
+            </div>
+            <h2 class="text-4xl md:text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-gray-800 to-gray-600 dark:from-gray-100 dark:to-gray-300">Pertanyaan Umum</h2>
+            <p class="text-gray-600 dark:text-gray-400 text-lg">Jawaban untuk pertanyaan yang sering diajukan</p>
+        </div>
+        
+        <div class="max-w-3xl mx-auto space-y-6">
+            <!-- FAQ Item 1 -->
+            <div x-data="{ open: false }" class="bg-white dark:bg-gray-700 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-600">
+                <button @click="open = !open" class="flex justify-between items-center w-full text-left">
+                    <span class="text-xl font-semibold text-gray-900 dark:text-white">Apa itu Bisnis Naik Kelas?</span>
+                    <svg :class="{'rotate-180': open}" class="w-6 h-6 text-gray-500 dark:text-gray-400 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                <div x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 transform -translate-y-2" x-transition:enter-end="opacity-100 transform translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 transform translate-y-0" x-transition:leave-end="opacity-0 transform -translate-y-2" class="mt-4">
+                    <p class="text-gray-600 dark:text-gray-300">Platform yang membantu UMKM mengevaluasi kesiapan bisnis mereka dan memberikan rekomendasi untuk naik ke level berikutnya melalui penilaian komprehensif dan saran yang dipersonalisasi.</p>
+                </div>
+            </div>
+
+            <!-- FAQ Item 2 -->
+            <div x-data="{ open: false }" class="bg-white dark:bg-gray-700 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-600">
+                <button @click="open = !open" class="flex justify-between items-center w-full text-left">
+                    <span class="text-xl font-semibold text-gray-900 dark:text-white">Bagaimana cara kerjanya?</span>
+                    <svg :class="{'rotate-180': open}" class="w-6 h-6 text-gray-500 dark:text-gray-400 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                <div x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 transform -translate-y-2" x-transition:enter-end="opacity-100 transform translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 transform translate-y-0" x-transition:leave-end="opacity-0 transform -translate-y-2" class="mt-4">
+                    <p class="text-gray-600 dark:text-gray-300">Anda akan mengisi form penilaian yang mencakup berbagai aspek bisnis. Setelah itu, sistem kami akan menganalisis jawaban Anda dan memberikan rekomendasi yang sesuai dengan kondisi bisnis Anda.</p>
+                </div>
+            </div>
+
+            <!-- FAQ Item 3 -->
+            <div x-data="{ open: false }" class="bg-white dark:bg-gray-700 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-600">
+                <button @click="open = !open" class="flex justify-between items-center w-full text-left">
+                    <span class="text-xl font-semibold text-gray-900 dark:text-white">Apakah layanan ini berbayar?</span>
+                    <svg :class="{'rotate-180': open}" class="w-6 h-6 text-gray-500 dark:text-gray-400 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                <div x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 transform -translate-y-2" x-transition:enter-end="opacity-100 transform translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 transform translate-y-0" x-transition:leave-end="opacity-0 transform -translate-y-2" class="mt-4">
+                    <p class="text-gray-600 dark:text-gray-300">Tidak, layanan penilaian bisnis kami gratis untuk semua UMKM. Kami berkomitmen untuk membantu pertumbuhan UMKM Indonesia.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section> 

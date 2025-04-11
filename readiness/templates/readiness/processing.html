@@ -1,48 +1,250 @@
 {% extends 'readiness/base.html' %}
+{% load humanize %}
 
-{% block title %}Memproses Assessment{% endblock %}
+{% block title %}Processing Assessment{% endblock %}
 
-{% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-body text-center">
-                <h2 class="card-title mb-4">Memproses Assessment</h2>
-                
-                <div class="mb-4">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
+{% block readiness_content %}
+<div class="min-h-[60vh] flex items-center justify-center py-4">
+    <div class="w-full px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div class="grid grid-cols-1 gap-6">
+            <!-- Processing Status Card -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-8 text-center">
+                <!-- Loading Animation -->
+                <div class="mb-6">
+                    <div class="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto">
+                        <!-- Outer circle -->
+                        <div class="absolute inset-0 rounded-full border-4 border-blue-200 dark:border-blue-900"></div>
+                        <!-- Inner circle -->
+                        <div class="absolute inset-2 rounded-full border-4 border-blue-500 dark:border-blue-400 border-t-transparent animate-spin"></div>
+                        <!-- Checkmark (hidden by default) -->
+                        <div class="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300" id="successCheck">
+                            <svg class="w-10 h-10 sm:w-12 sm:h-12 text-green-500 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
                     </div>
                 </div>
-                
-                <p class="mb-4">Mohon tunggu sebentar. Kami sedang menyiapkan laporan assessment Anda.</p>
-                
-                <div id="download-section" style="display: none;">
-                    <a href="#" id="download-button" class="btn btn-primary btn-lg">
-                        Download Laporan
+
+                <!-- Status Messages -->
+                <div class="space-y-4">
+                    <h1 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white" id="statusTitle">Memproses Assessment</h1>
+                    <p class="text-sm sm:text-base text-gray-600 dark:text-gray-300" id="statusMessage">Mohon tunggu sebentar, kami sedang menganalisis data bisnis Anda...</p>
+                    
+                    <!-- Progress Steps -->
+                    <div class="mt-6 sm:mt-8">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0 mb-4">
+                            <div class="flex items-center">
+                                <div class="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-blue-500 dark:bg-blue-600 text-white flex items-center justify-center text-xs sm:text-sm font-medium">1</div>
+                                <span class="ml-2 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Mengumpulkan Data</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 flex items-center justify-center text-xs sm:text-sm font-medium">2</div>
+                                <span class="ml-2 text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">Menganalisis</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 flex items-center justify-center text-xs sm:text-sm font-medium">3</div>
+                                <span class="ml-2 text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">Menyiapkan Laporan</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Progress Bar -->
+                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                            <div class="bg-blue-500 dark:bg-blue-400 h-2 rounded-full transition-all duration-500" id="progressBar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons (Hidden by default) -->
+                <div class="mt-6 sm:mt-8 opacity-0 transition-opacity duration-300" id="actionButtons">
+                    <a href="{% url 'readiness:user_dashboard' %}" class="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-sm sm:text-base rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200">
+                        <span>Kembali ke Dashboard</span>
                     </a>
+                </div>
+            </div>
+
+            <!-- Assessment Summary Card -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-8 opacity-0 transition-opacity duration-300" id="assessmentSummary">
+                <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white mb-4 sm:mb-6">Ringkasan Assessment</h2>
+                
+                <div class="space-y-4 sm:space-y-6">
+                    <!-- Basic Info -->
+                    <div>
+                        <h3 class="text-base sm:text-lg font-semibold text-gray-700 dark:text-gray-200 mb-3">Informasi Dasar</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                            <div>
+                                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Nama Bisnis</p>
+                                <p class="text-sm sm:text-base font-medium text-gray-900 dark:text-white">{{ assessment.business_name }}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Jenis Bisnis</p>
+                                <p class="text-sm sm:text-base font-medium text-gray-900 dark:text-white">{{ assessment.business_type }}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Tahun Mulai</p>
+                                <p class="text-sm sm:text-base font-medium text-gray-900 dark:text-white">{{ assessment.year_started }}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Jumlah Karyawan</p>
+                                <p class="text-sm sm:text-base font-medium text-gray-900 dark:text-white">{{ assessment.employee_count }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Key Metrics -->
+                    <div>
+                        <h3 class="text-base sm:text-lg font-semibold text-gray-700 dark:text-gray-200 mb-3">Metrik Utama</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 sm:p-4">
+                                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Pendapatan Tahunan</p>
+                                <p class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">Rp {{ assessment.annual_revenue|floatformat:0|intcomma }}</p>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 sm:p-4">
+                                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Status Digital</p>
+                                <p class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
+                                    {% if assessment.has_website and assessment.has_online_store %}
+                                        Fully Digital
+                                    {% elif assessment.has_website or assessment.has_online_store %}
+                                        Partially Digital
+                                    {% else %}
+                                        Traditional
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Score Summary -->
+                    <div>
+                        <h3 class="text-base sm:text-lg font-semibold text-gray-700 dark:text-gray-200 mb-3">Ringkasan Skor</h3>
+                        
+                        <!-- Total Score -->
+                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 sm:p-4 mb-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Skor Total</p>
+                                    <p class="text-xl sm:text-2xl font-bold {% if assessment.total_score >= 80 %}text-green-600 dark:text-green-400{% elif assessment.total_score >= 60 %}text-yellow-600 dark:text-yellow-400{% else %}text-red-600 dark:text-red-400{% endif %}">
+                                        {{ assessment.total_score }}%
+                                    </p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Level Bisnis</p>
+                                    <p class="text-sm sm:text-lg font-semibold text-gray-900 dark:text-white">{{ assessment.business_level }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Business Goals -->
+                    <div>
+                        <h3 class="text-base sm:text-lg font-semibold text-gray-700 dark:text-gray-200 mb-3">Tujuan Bisnis</h3>
+                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 sm:p-4">
+                            <p class="text-sm sm:text-base text-gray-700 dark:text-gray-200">{{ assessment.business_goals }}</p>
+                        </div>
+                    </div>
+
+                    <!-- CTA -->
+                    <div class="mt-6 sm:mt-8 border-t border-gray-200 dark:border-gray-700 pt-4 sm:pt-6">
+                        <h3 class="text-base sm:text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4 text-center">Laporan Lengkap</h3>
+                        <div class="flex justify-center">
+                            <a href="#" class="inline-flex items-center px-6 sm:px-8 py-2 sm:py-3 bg-blue-600 dark:bg-blue-500 text-white text-sm sm:text-base font-medium rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-transform" id="viewReportBtn">
+                                <span>Klik Disini Untuk Laporan Lengkap</span>
+                                <svg class="w-4 h-4 sm:w-5 sm:h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-{% endblock %}
 
-{% block extra_js %}
 <script>
-    function checkStatus() {
-        $.get("{% url 'check_status' assessment.id %}", function(data) {
-            if (data.ready) {
-                $('#download-section').show();
-                $('#download-button').attr('href', data.download_url);
-            } else {
-                setTimeout(checkStatus, 5000);  // Poll every 5 seconds
-            }
-        });
-    }
+document.addEventListener('DOMContentLoaded', function() {
+    const progressBar = document.getElementById('progressBar');
+    const statusTitle = document.getElementById('statusTitle');
+    const statusMessage = document.getElementById('statusMessage');
+    const successCheck = document.getElementById('successCheck');
+    const actionButtons = document.getElementById('actionButtons');
+    const viewReportBtn = document.getElementById('viewReportBtn');
+    const assessmentSummary = document.getElementById('assessmentSummary');
     
-    $(document).ready(function() {
-        checkStatus();
-    });
+    const steps = [
+        { title: 'Memproses Assessment', message: 'Mohon tunggu sebentar, kami sedang menganalisis data bisnis Anda...' },
+        { title: 'Menganalisis Data', message: 'Menganalisis informasi bisnis dan menghitung skor...' },
+        { title: 'Menyiapkan Laporan', message: 'Membuat rekomendasi dan menyiapkan laporan detail...' },
+        { title: 'Selesai!', message: 'Assessment Anda telah selesai diproses.' }
+    ];
+    
+    let currentStep = 0;
+    let checkCount = 0;
+
+    function updateUI(progress) {
+        progressBar.style.width = `${progress}%`;
+        
+        if (progress <= 33) {
+            currentStep = 0;
+        } else if (progress <= 66) {
+            currentStep = 1;
+        } else if (progress <= 99) {
+            currentStep = 2;
+        } else {
+            currentStep = 3;
+        }
+
+        statusTitle.textContent = steps[currentStep].title;
+        statusMessage.textContent = steps[currentStep].message;
+
+        if (progress >= 100) {
+            // Show success animation
+            successCheck.classList.remove('opacity-0');
+            successCheck.classList.add('opacity-100');
+            
+            // Show action buttons
+            actionButtons.classList.remove('opacity-0');
+            actionButtons.classList.add('opacity-100');
+            
+            // Show assessment summary card
+            assessmentSummary.classList.remove('opacity-0');
+            assessmentSummary.classList.add('opacity-100');
+        }
+    }
+
+    function checkReportStatus() {
+        fetch(`/readiness/check-status/{{ assessment.id }}/`)
+            .then(response => response.json())
+            .then(data => {
+                checkCount++;
+                
+                if (data.ready) {
+                    // Report is ready
+                    updateUI(100);
+                    // Update view report button href if URL is provided
+                    if (data.download_url) {
+                        viewReportBtn.href = data.download_url;
+                    }
+                    // Stop checking
+                    return;
+                } else {
+                    // Calculate progress based on check count
+                    // Max progress will be 90% until report is ready
+                    const progress = Math.min(90, checkCount * 5);
+                    updateUI(progress);
+                    
+                    // Continue checking every 2 seconds
+                    setTimeout(checkReportStatus, 2000);
+                }
+            })
+            .catch(error => {
+                console.error('Error checking report status:', error);
+                // Continue checking even if there's an error
+                setTimeout(checkReportStatus, 2000);
+            });
+    }
+
+    // Start checking status
+    checkReportStatus();
+});
 </script>
 {% endblock %} 

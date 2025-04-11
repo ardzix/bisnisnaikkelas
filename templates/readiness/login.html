@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block title %}Masuk / Daftar - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <div>
+            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
+                Selamat Datang di Bisnis Naik Kelas
+            </h2>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="flex border-b border-gray-200">
+            <button id="loginTab" class="flex-1 py-2 px-4 text-center border-b-2 font-medium text-sm focus:outline-none active-tab" onclick="switchTab('login')">
+                Masuk
+            </button>
+            <button id="registerTab" class="flex-1 py-2 px-4 text-center border-b-2 font-medium text-sm focus:outline-none inactive-tab" onclick="switchTab('register')">
+                Daftar
+            </button>
+        </div>
+
+        <!-- Login Form -->
+        <form id="loginForm" class="mt-8 space-y-6">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ next }}">
+            <div class="rounded-md shadow-sm -space-y-px">
+                <div>
+                    <label for="loginEmail" class="sr-only">Alamat Email</label>
+                    <input id="loginEmail" name="email" type="email" required class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" placeholder="Alamat Email">
+                </div>
+                <div>
+                    <label for="loginPassword" class="sr-only">Kata Sandi</label>
+                    <input id="loginPassword" name="password" type="password" required class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" placeholder="Kata Sandi">
+                </div>
+            </div>
+
+            <div>
+                <button type="submit" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    Masuk
+                </button>
+            </div>
+        </form>
+
+        <!-- Register Form -->
+        <form id="registerForm" class="mt-8 space-y-6 hidden">
+            {% csrf_token %}
+            <div class="rounded-md shadow-sm -space-y-px">
+                <div>
+                    <label for="registerEmail" class="sr-only">Alamat Email</label>
+                    <input id="registerEmail" name="email" type="email" required class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" placeholder="Alamat Email">
+                </div>
+                <div>
+                    <label for="fullName" class="sr-only">Nama Lengkap</label>
+                    <input id="fullName" name="full_name" type="text" required class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" placeholder="Nama Lengkap">
+                </div>
+                <div>
+                    <label for="phone" class="sr-only">Nomor Telepon</label>
+                    <input id="phone" name="phone" type="tel" required class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" placeholder="Nomor Telepon">
+                </div>
+                <div>
+                    <label for="registerPassword" class="sr-only">Kata Sandi</label>
+                    <input id="registerPassword" name="password" type="password" required class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" placeholder="Kata Sandi">
+                </div>
+            </div>
+
+            <div>
+                <button type="submit" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    Daftar
+                </button>
+            </div>
+        </form>
+
+        <div id="errorMessage" class="text-red-500 text-center hidden"></div>
+    </div>
+</div>
+
+<style>
+.active-tab {
+    border-b-color: #2563eb;
+    color: #2563eb;
+}
+.inactive-tab {
+    border-b-color: transparent;
+    color: #6b7280;
+}
+.dark .active-tab {
+    color: #3b82f6;
+}
+.dark .inactive-tab {
+    color: #9ca3af;
+}
+</style>
+
+<script>
+function switchTab(tab) {
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    const loginTab = document.getElementById('loginTab');
+    const registerTab = document.getElementById('registerTab');
+    const errorMessage = document.getElementById('errorMessage');
+
+    if (tab === 'login') {
+        loginForm.classList.remove('hidden');
+        registerForm.classList.add('hidden');
+        loginTab.classList.add('active-tab');
+        loginTab.classList.remove('inactive-tab');
+        registerTab.classList.add('inactive-tab');
+        registerTab.classList.remove('active-tab');
+    } else {
+        loginForm.classList.add('hidden');
+        registerForm.classList.remove('hidden');
+        loginTab.classList.add('inactive-tab');
+        loginTab.classList.remove('active-tab');
+        registerTab.classList.add('active-tab');
+        registerTab.classList.remove('inactive-tab');
+    }
+    
+    errorMessage.classList.add('hidden');
+    errorMessage.textContent = '';
+}
+
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const errorDiv = document.getElementById('errorMessage');
+    
+    try {
+        const response = await fetch('{% url "readiness:login" %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({
+                email: formData.get('email'),
+                password: formData.get('password'),
+                next: formData.get('next')
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.error) {
+            errorDiv.textContent = data.error === 'Invalid credentials' ? 'Email atau kata sandi salah' : data.error;
+            errorDiv.classList.remove('hidden');
+            return;
+        }
+        
+        if (data.mfa_required) {
+            errorDiv.textContent = 'Verifikasi dua langkah diperlukan';
+            errorDiv.classList.remove('hidden');
+            return;
+        }
+        
+        if (data.success) {
+            localStorage.setItem('access_token', data.access);
+            localStorage.setItem('refresh_token', data.refresh);
+            window.location.href = data.redirect_url;
+        } else {
+            errorDiv.textContent = 'Gagal masuk. Silakan periksa kembali data Anda.';
+            errorDiv.classList.remove('hidden');
+        }
+        
+    } catch (error) {
+        console.error('Login error:', error);
+        errorDiv.textContent = 'Terjadi kesalahan. Silakan coba lagi.';
+        errorDiv.classList.remove('hidden');
+    }
+});
+
+document.getElementById('registerForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const errorDiv = document.getElementById('errorMessage');
+    
+    try {
+        const response = await fetch('{% url "readiness:register" %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({
+                email: formData.get('email'),
+                password: formData.get('password'),
+                full_name: formData.get('full_name'),
+                phone: formData.get('phone')
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.error) {
+            errorDiv.textContent = data.error;
+            errorDiv.classList.remove('hidden');
+            return;
+        }
+        
+        if (data.success) {
+            localStorage.setItem('access_token', data.access);
+            localStorage.setItem('refresh_token', data.refresh);
+            window.location.href = '{% url "readiness:user_dashboard" %}';
+        } else {
+            errorDiv.textContent = 'Pendaftaran gagal. Silakan coba lagi.';
+            errorDiv.classList.remove('hidden');
+        }
+        
+    } catch (error) {
+        console.error('Registration error:', error);
+        errorDiv.textContent = 'Terjadi kesalahan saat pendaftaran. Silakan coba lagi.';
+        errorDiv.classList.remove('hidden');
+    }
+});
+</script>
+{% endblock %} 
